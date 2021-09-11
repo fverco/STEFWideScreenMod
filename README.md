@@ -2,6 +2,13 @@
 
 An application that applies the widescreen mod to Star Trek Voyager Elite Force.
 
+## Common problems
+
+---
+
+* ***Problem***: My game's screen is cropped after applying the mod.
+* ***Solution***: Go to your game directory. Right click the "stvoy.exe" and click properties. Click on the Compatibility tab and click on "Change high DPI settings". Then click on the check box with "Override high DPI scaling behaviour. Scaling performed by:" next to it. Make sure the box below it has "Application" selected. Click OK and apply the changes. This should fix the cropping issue.
+
 ## Requirements for compiling code
 
 ---
