@@ -33,3 +33,6 @@
 
 # Folder of the compiled application
 /compiled/*
+
+# Files produced by the application
+*.ini
