@@ -18,10 +18,18 @@ int main()
 
 	system("pause");
 
+	cout << endl;
+
 	modder.applyMod();
 
 	cout << "Have fun!" << endl
 		 << endl;
+
+	cout << "PS. If you encounter any problems with the mod. Remember to visit this link for solutions:" << endl
+		 << "https://github.com/fverco/STEFWideScreenMod#common-problems" << endl
+		 << endl;
+
+	system("pause");
 
 	return 0;
 }
