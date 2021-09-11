@@ -1,8 +1,6 @@
 #include "STEFWideScreenMod.hpp"
 
 #include <iostream>
-#include <vector>
-#include <string>
 #include <filesystem>
 
 using namespace std;
