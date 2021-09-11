@@ -1,6 +1,7 @@
 #include "STEFWideScreenMod.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <filesystem>
 
 using namespace std;
@@ -16,118 +17,196 @@ vector<string> STEFWideScreenMod::resolutionList({"1024x600", "1024x640", "1280x
 
 STEFWideScreenMod::STEFWideScreenMod() : pathToGame("C:\\Program Files (x86)\\GOG Galaxy\\Games\\Star Trek Elite Force"),
                                          pathToMod(""),
-                                         preferredResolution(""){};
+                                         preferredResolution(""),
+                                         assignedPathToGame(false),
+                                         assignedPathToMod(false){};
 
-void STEFWideScreenMod::detectGameDirectory()
+bool STEFWideScreenMod::detectConfigFile()
 {
-    if (!fs::exists(pathToGame + "\\stvoy.exe"))
+    if (fs::exists("dirs.ini"))
     {
-        cout << "Could not find the path to the game directory." << endl;
+        ifstream dirsFile("dirs.ini");
+        string line("");
+        string dir("");
+        string dirVal("");
+        unsigned int posOfColon(0);
 
-        while (!fs::exists(pathToGame + "\\stvoy.exe"))
+        while (getline(dirsFile, line))
         {
-            cout << "Please provide a valid path to the game directory:" << endl;
-            getline(cin, pathToGame);
-            cout << endl;
+            posOfColon = line.find_first_of(':');
+            dir = line.substr(0, posOfColon);
+            dirVal = line.substr(posOfColon + 1, line.length() - posOfColon + 1);
+
+            if (dir == "GameDir")
+            {
+                if (fs::exists(dirVal + "\\stvoy.exe"))
+                {
+                    pathToGame = dirVal;
+                    assignedPathToGame = true;
+                }
+            }
+            else if (dir == "ModDir")
+            {
+                if (fs::exists(dirVal))
+                {
+                    pathToMod = dirVal;
+                    assignedPathToMod = true;
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        dirsFile.close();
+
+        if (assignedPathToGame && assignedPathToMod)
+        {
+            return true;
         }
     }
 
-    cout << "Game directory found!" << endl
-         << endl;
+    return false;
 }
 
-void STEFWideScreenMod::detectModDirectory()
+void STEFWideScreenMod::getGameDirectory()
 {
-    bool pathIsValid(false);
-
-    cout << "Please download the widescreen fix from this website:" << endl
-         << "https://www.wsgf.org/dr/star-trek-voyager-elite-force" << endl
-         << endl
-         << "Once you have downloaded the archive, extract it anywhere into its own folder" << endl;
-
-    do
+    if (!assignedPathToGame)
     {
-        cout << "Please provide the path to the extracted mod folder:" << endl;
-
-        getline(cin, pathToMod);
-        cout << endl;
-
-        // Check if the directory exists.
-        while (!fs::exists(pathToMod))
+        if (!fs::exists(pathToGame + "\\stvoy.exe"))
         {
-            cout << "The path you provided does not exist. Please provide a valid path:" << endl;
-            getline(cin, pathToMod);
-            cout << endl;
-        }
+            cout << "Could not find the path to the game directory." << endl;
 
-        pathIsValid = true;
-
-        // Check if the directory contains all of the folders.
-        for (int i(0); i < resolutionList.size(); ++i)
-        {
-            if (!fs::exists(pathToMod + "//" + resolutionList.at(i)))
+            while (!fs::exists(pathToGame + "\\stvoy.exe"))
             {
-                pathIsValid = false;
-                cout << "Error! The path does not contain all the mod files. Please extract the mod archive and DO NOT TOUCH ANYTHING IN IT." << endl;
-                break;
+                cout << "Please provide a valid path to the game directory:" << endl;
+                getline(cin, pathToGame);
+                cout << endl;
             }
         }
-    } while (!pathIsValid);
+        else
+        {
+            assignedPathToGame = true;
+
+            ofstream dirsFile("dirs.ini", ios_base::app);
+            dirsFile << "GameDir:" << pathToGame << endl;
+            dirsFile.close();
+        }
+
+        cout << "Game directory found!" << endl
+             << endl;
+    }
+}
+
+void STEFWideScreenMod::getModDirectory()
+{
+    if (!assignedPathToMod)
+    {
+        bool pathIsValid(false);
+
+        cout << "Please download the widescreen fix from this website:" << endl
+             << "https://www.wsgf.org/dr/star-trek-voyager-elite-force" << endl
+             << endl
+             << "Once you have downloaded the archive, extract it anywhere into its own folder" << endl;
+
+        do
+        {
+            cout << "Please provide the path to the extracted mod folder:" << endl;
+
+            getline(cin, pathToMod);
+            cout << endl;
+
+            // Check if the directory exists.
+            while (!fs::exists(pathToMod))
+            {
+                cout << "The path you provided does not exist. Please provide a valid path:" << endl;
+                getline(cin, pathToMod);
+                cout << endl;
+            }
+
+            pathIsValid = true;
+
+            // Check if the directory contains all of the folders.
+            for (int i(0); i < resolutionList.size(); ++i)
+            {
+                if (!fs::exists(pathToMod + "//" + resolutionList.at(i)))
+                {
+                    pathIsValid = false;
+                    cout << "Error! The path does not contain all the mod files. Please extract the mod archive and DO NOT TOUCH ANYTHING IN IT." << endl;
+                    break;
+                }
+            }
+        } while (!pathIsValid);
+
+        assignedPathToMod = true;
+
+        ofstream dirsFile("dirs.ini", ios_base::app);
+        dirsFile << "ModDir:" << pathToMod << endl;
+        dirsFile.close();
+    }
 }
 
 void STEFWideScreenMod::getPreferredResolution()
 {
-    string input("");
-
-    cout << "Which resolution would you like your game to have?" << endl;
-
-    for (int i(0); i < resolutionList.size(); ++i)
+    if (assignedPathToGame && assignedPathToMod)
     {
-        cout << "[" + to_string(i + 1) + "] - " + resolutionList.at(i) << endl;
-    }
+        string input("");
 
-    int resolutionNum(0);
+        cout << "Which resolution would you like your game to have?" << endl;
 
-    do
-    {
+        for (int i(0); i < resolutionList.size(); ++i)
+        {
+            cout << "[" + to_string(i + 1) + "] - " + resolutionList.at(i) << endl;
+        }
+
+        int resolutionNum(0);
+
+        do
+        {
+            cout << endl
+                 << "Type the number of the resolution you want: ";
+            cin >> input;
+            resolutionNum = stoi(input);
+
+        } while (resolutionNum < 1 || resolutionNum > resolutionList.size());
+
+        preferredResolution = resolutionList.at(resolutionNum - 1);
+
         cout << endl
-             << "Type the number of the resolution you want: ";
-        cin >> input;
-        resolutionNum = stoi(input);
-
-    } while (resolutionNum < 1 || resolutionNum > resolutionList.size());
-
-    preferredResolution = resolutionList.at(resolutionNum - 1);
-
-    cout << endl
-         << "Your resolution: " << preferredResolution << endl
-         << endl;
+             << "Your resolution: " << preferredResolution << endl
+             << endl;
+    }
 }
 
 void STEFWideScreenMod::applyMod()
 {
-    vector<string> rootFiles({
-        "stvoy.exe",
-        "efgamex86.dll",
-    });
-    string baseEfFile("autoexec.cfg");
-
-    for (int i(0); i < rootFiles.size(); ++i)
+    if (assignedPathToGame && assignedPathToMod)
     {
-        fs::rename(pathToGame + "//" + rootFiles.at(i),
-                   pathToGame + "//" + rootFiles.at(i) + ".old");
-        fs::copy(pathToMod + "//" + preferredResolution + "//" + rootFiles.at(i),
-                 pathToGame + "//" + rootFiles.at(i));
+        vector<string> rootFiles({
+            "stvoy.exe",
+            "efgamex86.dll",
+        });
+        string baseEfFile("autoexec.cfg");
+
+        for (int i(0); i < rootFiles.size(); ++i)
+        {
+            fs::rename(pathToGame + "//" + rootFiles.at(i),
+                       pathToGame + "//" + rootFiles.at(i) + ".old");
+            fs::copy(pathToMod + "//" + preferredResolution + "//" + rootFiles.at(i),
+                     pathToGame + "//" + rootFiles.at(i));
+        }
+
+        if (fs::exists(pathToGame + "//BaseEF//" + baseEfFile))
+        {
+            fs::rename(pathToGame + "//BaseEF//" + baseEfFile,
+                       pathToGame + "//BaseEF//" + baseEfFile + ".old");
+        }
+
+        fs::copy(pathToMod + "//" + preferredResolution + "//BaseEF//" + baseEfFile,
+                 pathToGame + "//BaseEF//" + baseEfFile);
+
+        cout << "Finished." << endl
+             << endl;
     }
-
-    if (fs::exists(pathToGame + "//BaseEF//" + baseEfFile)) {
-        fs::rename(pathToGame + "//BaseEF//" + baseEfFile,
-               pathToGame + "//BaseEF//" + baseEfFile + ".old");
-    }
-
-    fs::copy(pathToMod + "//" + preferredResolution + "//BaseEF//" + baseEfFile,
-             pathToGame + "//BaseEF//" + baseEfFile);
-
-    cout << "Finished." << endl
-         << endl;
 }

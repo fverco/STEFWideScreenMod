@@ -7,8 +7,9 @@ class STEFWideScreenMod {
 	public:
         STEFWideScreenMod();
 
-        void detectGameDirectory();
-        void detectModDirectory();
+        bool detectConfigFile();
+        void getGameDirectory();
+        void getModDirectory();
         void getPreferredResolution();
         void applyMod();
 
@@ -16,6 +17,8 @@ class STEFWideScreenMod {
 		string pathToGame;
 		string pathToMod;
 		string preferredResolution;
+    bool assignedPathToGame;
+    bool assignedPathToMod;
 
-		static vector<string> resolutionList;
+    static vector<string> resolutionList;
 };

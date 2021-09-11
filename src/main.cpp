@@ -12,8 +12,9 @@ int main()
 	cout << "Welcome to the Star Trek Voyager Elite Force Wide Screen Modder." << endl
 		 << endl;
 
-	modder.detectGameDirectory();
-	modder.detectModDirectory();
+	modder.detectConfigFile();
+	modder.getGameDirectory();
+	modder.getModDirectory();
 	modder.getPreferredResolution();
 
 	system("pause");
