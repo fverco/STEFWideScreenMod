@@ -19,7 +19,8 @@ STEFWideScreenMod::STEFWideScreenMod() : pathToGame("C:\\Program Files (x86)\\GO
                                          pathToMod(""),
                                          preferredResolution(""),
                                          assignedPathToGame(false),
-                                         assignedPathToMod(false){};
+                                         assignedPathToMod(false),
+                                         detectedOldFiles(false){};
 
 bool STEFWideScreenMod::detectConfigFile()
 {
@@ -179,7 +180,23 @@ void STEFWideScreenMod::getPreferredResolution()
     }
 }
 
-void STEFWideScreenMod::applyMod()
+bool STEFWideScreenMod::detectOldFiles()
+{
+    if (assignedPathToGame && assignedPathToMod)
+    {
+        if (fs::exists(pathToGame + "//stvoy.exe.old") ||
+            fs::exists(pathToGame + "//efgamex86.dll.old") ||
+            fs::exists(pathToGame + "//BaseEF//autoexec.cfg.old"))
+        {
+            detectedOldFiles = true;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void STEFWideScreenMod::applyMod(const bool &backupFiles)
 {
     if (assignedPathToGame && assignedPathToMod)
     {
@@ -191,22 +208,65 @@ void STEFWideScreenMod::applyMod()
 
         for (int i(0); i < rootFiles.size(); ++i)
         {
-            fs::rename(pathToGame + "//" + rootFiles.at(i),
-                       pathToGame + "//" + rootFiles.at(i) + ".old");
+            if (backupFiles)
+            {
+                fs::rename(pathToGame + "//" + rootFiles.at(i),
+                           pathToGame + "//" + rootFiles.at(i) + ".old");
+            }
+
             fs::copy(pathToMod + "//" + preferredResolution + "//" + rootFiles.at(i),
-                     pathToGame + "//" + rootFiles.at(i));
+                     pathToGame + "//" + rootFiles.at(i),
+                     fs::copy_options::overwrite_existing);
         }
 
-        if (fs::exists(pathToGame + "//BaseEF//" + baseEfFile))
+        if (backupFiles && fs::exists(pathToGame + "//BaseEF//" + baseEfFile))
         {
             fs::rename(pathToGame + "//BaseEF//" + baseEfFile,
                        pathToGame + "//BaseEF//" + baseEfFile + ".old");
         }
 
         fs::copy(pathToMod + "//" + preferredResolution + "//BaseEF//" + baseEfFile,
-                 pathToGame + "//BaseEF//" + baseEfFile);
+                 pathToGame + "//BaseEF//" + baseEfFile,
+                 fs::copy_options::overwrite_existing);
 
-        cout << "Finished." << endl
+        cout << "Successfully installed the mod." << endl
+             << endl;
+    }
+}
+
+void STEFWideScreenMod::revertMod()
+{
+    if (detectedOldFiles && assignedPathToGame && assignedPathToMod)
+    {
+        vector<string> rootFiles({
+            "stvoy.exe",
+            "efgamex86.dll",
+        });
+        string baseEfFile("autoexec.cfg");
+
+        for (int i(0); i < rootFiles.size(); ++i)
+        {
+            if (fs::exists(pathToGame + "//" + rootFiles.at(i) + ".old"))
+            {
+                fs::remove(pathToGame + "//" + rootFiles.at(i));
+                fs::rename(pathToGame + "//" + rootFiles.at(i) + ".old",
+                           pathToGame + "//" + rootFiles.at(i));
+            }
+        }
+
+        if (fs::exists(pathToGame + "//BaseEF//" + baseEfFile + ".old"))
+        {
+            fs::remove(pathToGame + "//BaseEF//" + baseEfFile);
+            fs::rename(pathToGame + "//BaseEF//" + baseEfFile + ".old",
+                       pathToGame + "//BaseEF//" + baseEfFile);
+        }
+        else if (fs::exists(pathToGame + "//BaseEF//" + baseEfFile))
+        {
+            fs::remove(pathToGame + "//BaseEF//" + baseEfFile);
+        }
+
+        cout << endl
+             << "Successfully uninstalled the mod." << endl
              << endl;
     }
 }
