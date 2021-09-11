@@ -15,13 +15,40 @@ int main()
 	modder.detectConfigFile();
 	modder.getGameDirectory();
 	modder.getModDirectory();
-	modder.getPreferredResolution();
 
-	system("pause");
+	if (!modder.detectOldFiles())
+	{
+		modder.getPreferredResolution();
+		system("pause");
+		cout << endl;
+		modder.applyMod();
+	}
+	else
+	{
+		string input("");
 
-	cout << endl;
+		cout << "I have detected old files from a previous mod installation." << endl
+			 << endl
+			 << "Would you like to uninstall the mod? (This will restore your game to it's original state) " << endl;
 
-	modder.applyMod();
+		do
+		{
+			cout << "Answer <Y> for yes or <N> for no: ";
+			cin >> input;
+		} while (input != "Y" && input != "y" && input != "N" && input != "n");
+
+		if (input == "Y" || input == "y")
+		{
+			modder.revertMod();
+		}
+		else
+		{
+			modder.getPreferredResolution();
+			system("pause");
+			cout << endl;
+			modder.applyMod(false);
+		}
+	}
 
 	cout << "Have fun!" << endl
 		 << endl;
