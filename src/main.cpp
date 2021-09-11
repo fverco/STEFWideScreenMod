@@ -9,7 +9,7 @@ int main()
 {
 	STEFWideScreenMod modder;
 
-	cout << "Welcome to the Star Trek Voyager Elite Force Wide Screen Modder." << endl
+	cout << "Welcome to the Star Trek Voyager Elite Force Wide Screen Modder. (v1.1)" << endl
 		 << endl;
 
 	modder.detectConfigFile();
