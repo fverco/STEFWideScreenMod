@@ -1,16 +1,12 @@
-#ifndef _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#endif
-
 #include "STEFWideScreenMod.hpp"
 
 #include <iostream>
 #include <vector>
 #include <string>
-#include <experimental/filesystem>
+#include <filesystem>
 
 using namespace std;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 vector<string> STEFWideScreenMod::resolutionList({"1024x600", "1024x640", "1280x720", "1280x768",
                                                   "1280x800", "1360x768", "1366x768", "1440x900",
