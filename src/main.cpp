@@ -9,7 +9,7 @@ int main()
 {
 	STEFWideScreenMod modder;
 
-	cout << "Welcome to the Star Trek Voyager Elite Force Wide Screen Modder. (v1.1)" << endl
+	cout << "Welcome to the Star Trek Voyager Elite Force Wide Screen Modder. (v1.1a)" << endl
 		 << endl;
 
 	modder.detectConfigFile();
@@ -36,6 +36,8 @@ int main()
 			cout << "Answer <Y> for yes or <N> for no: ";
 			cin >> input;
 		} while (input != "Y" && input != "y" && input != "N" && input != "n");
+
+		cout << endl;
 
 		if (input == "Y" || input == "y")
 		{
