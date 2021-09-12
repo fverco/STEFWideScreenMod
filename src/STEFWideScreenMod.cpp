@@ -27,44 +27,52 @@ bool STEFWideScreenMod::detectConfigFile()
     if (fs::exists("dirs.ini"))
     {
         ifstream dirsFile("dirs.ini");
-        string line("");
-        string dir("");
-        string dirVal("");
-        unsigned int posOfColon(0);
 
-        while (getline(dirsFile, line))
+        if (dirsFile)
         {
-            posOfColon = line.find_first_of(':');
-            dir = line.substr(0, posOfColon);
-            dirVal = line.substr(posOfColon + 1, line.length() - posOfColon + 1);
+            string line("");
+            string dir("");
+            string dirVal("");
+            unsigned int posOfColon(0);
 
-            if (dir == "GameDir")
+            while (getline(dirsFile, line))
             {
-                if (fs::exists(dirVal + "\\stvoy.exe"))
+                posOfColon = line.find_first_of(':');
+                dir = line.substr(0, posOfColon);
+                dirVal = line.substr(posOfColon + 1, line.length() - posOfColon + 1);
+
+                if (dir == "GameDir")
                 {
-                    pathToGame = dirVal;
-                    assignedPathToGame = true;
+                    if (fs::exists(dirVal + "\\stvoy.exe"))
+                    {
+                        pathToGame = dirVal;
+                        assignedPathToGame = true;
+                    }
+                }
+                else if (dir == "ModDir")
+                {
+                    if (fs::exists(dirVal))
+                    {
+                        pathToMod = dirVal;
+                        assignedPathToMod = true;
+                    }
+                }
+                else
+                {
+                    continue;
                 }
             }
-            else if (dir == "ModDir")
+
+            dirsFile.close();
+
+            if (assignedPathToGame && assignedPathToMod)
             {
-                if (fs::exists(dirVal))
-                {
-                    pathToMod = dirVal;
-                    assignedPathToMod = true;
-                }
-            }
-            else
-            {
-                continue;
+                return true;
             }
         }
-
-        dirsFile.close();
-
-        if (assignedPathToGame && assignedPathToMod)
+        else
         {
-            return true;
+            cout << "Error. Unable to open the dirs.ini file!" << endl << endl;
         }
     }
 
@@ -86,13 +94,20 @@ void STEFWideScreenMod::getGameDirectory()
                 cout << endl;
             }
         }
-        else
-        {
-            assignedPathToGame = true;
 
-            ofstream dirsFile("dirs.ini", ios_base::app);
+        assignedPathToGame = true;
+
+        ofstream dirsFile("dirs.ini", ios_base::app);
+
+        if (dirsFile)
+        {
             dirsFile << "GameDir:" << pathToGame << endl;
             dirsFile.close();
+        }
+        else
+        {
+            cout << "Error writing game directory to file! Please run this app with admin privileges" << endl
+                 << endl;
         }
 
         cout << "Game directory found!" << endl
@@ -143,8 +158,17 @@ void STEFWideScreenMod::getModDirectory()
         assignedPathToMod = true;
 
         ofstream dirsFile("dirs.ini", ios_base::app);
-        dirsFile << "ModDir:" << pathToMod << endl;
-        dirsFile.close();
+
+        if (dirsFile)
+        {
+            dirsFile << "ModDir:" << pathToMod << endl;
+            dirsFile.close();
+        }
+        else
+        {
+            cout << "Error writing mod directory to file! Please run this app with admin privileges" << endl
+                 << endl;
+        }
     }
 }
 
